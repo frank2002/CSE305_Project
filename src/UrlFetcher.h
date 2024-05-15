@@ -5,6 +5,9 @@
 #include <iostream>
 #include <string>
 
+#include "HttpResponse.h"
+
+
 
 size_t writeCallback(void* contents, size_t size, size_t nmemb, void* userp);
 
@@ -12,10 +15,11 @@ class UrlFetcher {
 public:
     UrlFetcher();
     ~UrlFetcher();
-    int fetch_url(const std::string& url, std::string& html_content);
+    int fetch_url(const std::string& url, HttpResponse& response);
 
 private:
     CURL* curl;
+    std::string UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
 };
 
 #endif // URLFETCHER_H
