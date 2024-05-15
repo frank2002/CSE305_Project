@@ -15,17 +15,18 @@ endif()
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 # Include directories
-include_directories(src)
 include_directories(scripts)
+include_directories(src)
 
 
 # Find all source files in src directory
-file(GLOB_RECURSE SRC_FILES src/*.cpp)
 
 file(GLOB_RECURSE SCRIPTS_FILES scripts/*.cpp)
+file(GLOB_RECURSE SRC_FILES src/*.cpp)
+
 
 # Main executable
-add_executable(ParallelCrawler main.cpp ${SRC_FILES} ${SCRIPTS_FILES})
+add_executable(ParallelCrawler main.cpp  ${SCRIPTS_FILES} ${SRC_FILES})
 
 add_subdirectory(third_party/curl-8.7.1)
 
