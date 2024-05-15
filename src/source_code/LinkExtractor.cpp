@@ -21,8 +21,6 @@ void LinkExtractor::extract_links(const std::string& html_content, std::vector<s
     return;
 }
 
-<<<<<<< HEAD
-=======
 void LinkExtractor::extract_links(const std::string& html_content, std::unordered_set<std::string>& links, const std::string& base_url) {
     std::smatch match;
     std::string::const_iterator search_start(html_content.cbegin());
@@ -37,4 +35,3 @@ void LinkExtractor::extract_links(const std::string& html_content, std::unordere
     return;
 }
 
->>>>>>> aad831c (Upload Link extractor & Add HttpResponse struture & modify URLFetcher)

@@ -17,7 +17,6 @@ int main() {
     std::string url3 = "https://www.isnowfy.com/libcurl-fetch-webpage/";
     std::string url4 = "https://www.example.com";
     std::string url5 = "https://assets.cnblogs.com/logo.svg";
-    std::string url5 = "https://assets.cnblogs.com/logo.svg";
 
     auto start = std::chrono::high_resolution_clock::now();
 
