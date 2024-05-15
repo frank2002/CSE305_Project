@@ -270,6 +270,7 @@ cython_debug/
 *.fatbin
 
 # ---> VisualStudioCode
+.vscode/
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
