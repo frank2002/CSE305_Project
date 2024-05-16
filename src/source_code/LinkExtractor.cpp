@@ -35,3 +35,26 @@ void LinkExtractor::extract_links(const std::string& html_content, std::unordere
     return;
 }
 
+std::vector<std::string> LinkExtractor::filter_links(std::unordered_set<std::string>& links, const std::string& domain, const int strictness) {
+    std::vector<std::string> filtered_links;
+    std::string search_part;
+    if (strictness == 1) {
+        search_part = domain;
+    } else if (strictness == 0) {
+        std::regex domainRegex(R"((?:.*\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,}))");
+        std::smatch match;
+        if (std::regex_search(domain, match, domainRegex) && match.size() > 1) {
+            search_part = match[1].str();
+        }
+        search_part = domain; // return the original domain if the regex fails
+    } else {
+        throw std::invalid_argument("Invalid strictness level");
+    }
+    for (const std::string& link : links) {
+        if (link.find(search_part) != std::string::npos) {
+            filtered_links.push_back(link);
+        }
+    }
+    return filtered_links;
+}
+
