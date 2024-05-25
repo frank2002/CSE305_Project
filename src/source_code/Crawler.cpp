@@ -1,5 +1,8 @@
 #include "Crawler.h"
 #include <string>
+#include <cpplog/log.h>
+
+#define CPPLOG_NAMESPACE logger
 
 Crawler::Crawler(const std::string& start_url, const size_t num_threads, const std::string& file_path) :
     num_threads(num_threads),
@@ -14,7 +17,9 @@ Crawler::~Crawler() {
 }
 
 void Crawler::start() {
-    std::cout<<"Starting Crawler"<<std::endl;
+    // std::cout<<"Starting Crawler"<<std::endl;
+    logger::info() << "Starting Crawler" << logger::endl;
+
     url_store.set_filename(file_path);
     url_scheduler.enqueueUrl(start_url);
 
@@ -63,7 +68,8 @@ void Crawler::worker_thread() {
             // std::cout << "num_active_threads: " << active_threads << std::endl;
             url_scheduler.queueCondition.wait(lock, [this] { return !url_scheduler.isEmpty_non_blocking() || !running; });
             if(!running && url_scheduler.isEmpty_non_blocking()){
-                std::cout << "Thread " << std::this_thread::get_id() << " is terminating" << std::endl;
+                // std::cout << "Thread " << std::this_thread::get_id() << " is terminating" << std::endl;
+                logger::debug() << "Thread " << std::this_thread::get_id() << " is terminating" << logger::endl;
                 return;
             }
             if (!url_scheduler.isEmpty_non_blocking()) {
@@ -82,7 +88,8 @@ void Crawler::worker_thread() {
         fetcher.fetch_url(current_url, response);
 
         if(verbose == 1){
-            std::cout << "Thread " << std::this_thread::get_id() << " fetched: " << current_url << " ; Code:" << response.status_code <<std::endl;
+            // std::cout << "[Success] Thread " << std::this_thread::get_id() << " fetched: (" << response.status_code <<") " <<current_url << std::endl;
+            logger::info() << "Fetched: (" << response.status_code <<") " <<current_url << logger::endl;
         }   
 
         if(response.status_code == 200){

@@ -26,7 +26,7 @@ int UrlFetcher::fetch_url(const std::string& url, HttpResponse& response) {
 
         CURLcode res = curl_easy_perform(curl);
         if (res != CURLE_OK) {
-            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
+            std::cerr << "[ERROR] Fetching URL failed: " << curl_easy_strerror(res) << "; URL: "<< url << std::endl;
             return 1;
         }
 
@@ -53,7 +53,7 @@ int UrlFetcher::fetch_url(const std::string& url, HttpResponse& response) {
         response.base_url = url.substr(0, path_start);
         response.domain = url.substr(scheme_end + 3, path_start - scheme_end - 3);
     } else {
-        std::cerr << "Failed to initialize CURL" << std::endl;
+        std::cerr << "[ERROR] Failed to initialize CURL" << std::endl;
         return 1;
     }
 

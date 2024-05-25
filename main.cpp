@@ -1,4 +1,9 @@
+#define CPPLOG_NAMESPACE logger
+
+
 #include <chrono>
+#include <cpplog/log.h>
+#include <cpplog/logger.h>
 
 
 #include "src/UrlFetcher.h"
@@ -9,15 +14,21 @@
 #include "src/UrlStore.h"
 #include "src/UrlScheduler.h"
 #include "src/Crawler.h"
+// #include "CustomLogger.h"
+
 
 
 #include "scripts/package_test.h"
 
 
-
+void initializeLogging() {
+    // Set the custom logger
+    logger::DEFAULT_LOGGER = std::make_unique<logger::CustomLogger>(logger::Level::DEBUG);
+}
 
 
 int main() {
+    initializeLogging();
     std::string url1 = "https://www.google.com";
     std::string url2 = "https://www.yahoo.com";
     std::string url3 = "https://www.isnowfy.com/libcurl-fetch-webpage/";

@@ -17,8 +17,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 # Include directories
 include_directories(scripts)
 include_directories(src)
-
-
+include_directories(third_party/cpplog/include)
 
 # Find all source files in src directory
 
@@ -39,3 +38,15 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(ParallelCrawler PRIVATE Threads::Threads)
 
+# Specify the path to the cpplog library
+set(CPPLOG_LIB_PATH ${CMAKE_SOURCE_DIR}/third_party/cpplog/lib/libcpplog.a)
+
+# Verify the cpplog library exists
+if(NOT EXISTS ${CPPLOG_LIB_PATH})
+    message(FATAL_ERROR "cpplog library not found at ${CPPLOG_LIB_PATH}")
+endif()
+
+# Link the cpplog static library
+target_link_libraries(ParallelCrawler PRIVATE ${CPPLOG_LIB_PATH})
+
+ 
