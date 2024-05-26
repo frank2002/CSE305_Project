@@ -132,7 +132,7 @@ namespace cpplog
         std::wstring toString(cpplog::Level level) const {
             switch (level) {
                 case cpplog::Level::DEBUG: return L"\033[0mDEBUG\033[0m";  // Default
-                case cpplog::Level::INFO: return L"\033[0mINFO\033[0m";    // Default
+                case cpplog::Level::INFO: return L"\033[32mINFO\033[0m";    // Green
                 case cpplog::Level::WARNING: return L"\033[33mWARN\033[0m"; // Yellow
                 case cpplog::Level::ERROR: return L"\033[31mERROR\033[0m";  // Red
                 case cpplog::Level::SEVERE: return L"\033[31mSEVERE\033[0m"; // Red

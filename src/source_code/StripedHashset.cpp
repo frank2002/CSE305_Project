@@ -4,7 +4,12 @@
 
 
 template<typename T>
-StripedHashset<T>::StripedHashset(int num_stripes) : num_stripes_(num_stripes), mutexes_(num_stripes), buckets_(num_stripes) {}
+StripedHashset<T>::StripedHashset(int num_stripes) : num_stripes_(num_stripes) {
+    buckets_.resize(num_stripes_);
+    for (size_t i = 0; i < num_stripes_; ++i) {
+        mutexes_.emplace_back(std::make_unique<std::shared_mutex>());
+    }
+}
 
 template<typename T>
 StripedHashset<T>::~StripedHashset() {}
@@ -47,26 +52,53 @@ bool StripedHashset<T>::contains(const T& element)  {
 
 template<typename T>
 void StripedHashset<T>::resize(size_t new_num_stripes) {
-    
-    logger::debug() << "Resizing hashset to " << new_num_stripes << " stripes" << logger::endl;
-    // std::cout << "Resizing hashset to " << new_num_stripes << " stripes" << std::endl;
-    std::vector<std::unique_lock<std::shared_mutex>> locks;
-    for (int i = 0; i < num_stripes_; ++i) {
-        locks.emplace_back(mutexes_[i]);
+    if (new_num_stripes <= num_stripes_) {
+        return;
     }
 
+    //start time
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
+    logger::debug() << "Resizing hashset to " << new_num_stripes << " stripes" << logger::endl;
+
+    // Lock all existing mutexes
+    std::vector<std::unique_lock<std::shared_mutex>> locks;
+    logger::debug() << "Locking all mutexes" << logger::endl;
+    for (size_t i = 0; i < num_stripes_; ++i) {
+        locks.emplace_back(*mutexes_[i]);
+    }
+    logger::debug() << "All mutexes locked" << logger::endl;
+
+    // Create new buckets and rehash elements
     std::vector<std::unordered_set<T>> new_buckets(new_num_stripes);
-    for (int i = 0; i < num_stripes_; ++i) {
+    logger::debug() << "Rehashing elements" << logger::endl;
+    for (size_t i = 0; i < num_stripes_; ++i) {
         for (const auto& element : buckets_[i]) {
             new_buckets[hash_fn_(element) % new_num_stripes].insert(element);
         }
     }
+    logger::debug() << "Elements rehashed" << logger::endl;
 
     buckets_ = std::move(new_buckets);
-    num_stripes_ = new_num_stripes;
-    // mutexes_.resize(new_num_stripes);
-    std::vector<std::shared_mutex> new_mutexes(new_num_stripes);
+
+    std::vector<std::unique_ptr<std::shared_mutex>> new_mutexes;
+    new_mutexes.reserve(new_num_stripes);
+    for (size_t i = 0; i < new_num_stripes; ++i) {
+        if (i < num_stripes_) {
+            new_mutexes.emplace_back(std::move(mutexes_[i]));
+        } else {
+            new_mutexes.emplace_back(std::make_unique<std::shared_mutex>()); // Construct a new shared_mutex
+        }
+    }
     mutexes_ = std::move(new_mutexes);
+
+    num_stripes_ = new_num_stripes;
+
+    //end time
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    logger::debug() << "Resizing took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << logger::endl;
+
+    logger::debug() << "All mutexes unlocked" << logger::endl;
 }
 
 template<typename T>
@@ -76,7 +108,7 @@ std::unordered_set<T>& StripedHashset<T>::get_bucket(const T& element) {
 
 template<typename T>
 std::shared_mutex& StripedHashset<T>::get_mutex(const T& element) {
-    return mutexes_[hash_fn_(element) % num_stripes_];
+    return *mutexes_[hash_fn_(element) % num_stripes_];
 }
 
 template<typename T>

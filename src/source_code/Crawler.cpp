@@ -87,10 +87,18 @@ void Crawler::worker_thread() {
 
         fetcher.fetch_url(current_url, response);
 
-        if(verbose == 1){
-            // std::cout << "[Success] Thread " << std::this_thread::get_id() << " fetched: (" << response.status_code <<") " <<current_url << std::endl;
-            logger::info() << "Fetched: (" << response.status_code <<") " <<current_url << logger::endl;
-        }   
+        
+        // std::cout << "[Success] Thread " << std::this_thread::get_id() << " fetched: (" << response.status_code <<") " <<current_url << std::endl;
+        std::string colored_status_code;
+        if (response.status_code == 200) {
+            //green
+            colored_status_code = "\033[1;32m" + std::to_string(response.status_code) + "\033[0m";
+        } else {
+            //yellow
+            colored_status_code = "\033[1;33m" + std::to_string(response.status_code) + "\033[0m";
+        }
+        logger::info() << "Fetched: (" << colored_status_code <<") " <<current_url << logger::endl;
+  
 
         if(response.status_code == 200){
             // check if the url is HTML content
@@ -112,6 +120,11 @@ void Crawler::worker_thread() {
             } else {
                 url_store.add_visited_url(response.url);
             }
+        }else if(response.status_code == 302 || response.status_code == 301){
+            url_store.add_visited_url(response.url);
+            url_scheduler.enqueueUrl(response.redirect_url);
+            url_store.write_url(response.redirect_url, response.url);
+            logger::info() << "Redirecting to: " << response.redirect_url << logger::endl;
         } else {
             url_store.add_visited_url(response.url);
         }

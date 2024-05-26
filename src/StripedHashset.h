@@ -11,6 +11,7 @@
 #include <functional>
 #include <algorithm>
 #include <iostream>
+#include <list>
 
 #include <cpplog/log.h>
 
@@ -40,13 +41,14 @@ private:
     // Number of stripes
     int num_stripes_;
     // Vector of mutexes for each stripe
-    std::vector<std::shared_mutex> mutexes_;
+    // std::vector<std::shared_mutex> mutexes_;
+    std::vector<std::unique_ptr<std::shared_mutex>> mutexes_;
     // Vector of hashsets for each stripe
     std::vector<std::unordered_set<T>> buckets_;
     // Hash function
     std::hash<T> hash_fn_;
     
-    float max_load_factor = 0.75;
+    float max_load_factor = 20;
     size_t size=0;
 
 

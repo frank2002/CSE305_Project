@@ -26,7 +26,11 @@ void LinkExtractor::extract_links(const std::string& html_content, std::unordere
     std::string::const_iterator search_start(html_content.cbegin());
     while (std::regex_search(search_start, html_content.cend(), match, link_regex)) {
         std::string link = match[1].str();
-        if (link.find("http") == std::string::npos) {
+        if(link.find("javascript:") == 0){
+            search_start = match.suffix().first;
+            continue;
+        }
+        if (link.find("http") != 0) {
             link = base_url + link;
         }
         links.insert(link);

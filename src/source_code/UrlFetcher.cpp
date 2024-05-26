@@ -1,8 +1,33 @@
+#define CPPLOG_NAMESPACE logger
+
+
 #include "UrlFetcher.h"
 
-size_t writeCallback(void* contents, size_t size, size_t nmemb, void* userp) {
-    ((std::string*)userp)->append((char*)contents, size * nmemb);
-    return size * nmemb;
+#include <cpplog/log.h>
+
+
+
+
+size_t UrlFetcher::writeCallback(void* contents, size_t size, size_t nmemb, void* userp) {
+    size_t totalSize = size * nmemb;
+    std::string* str = static_cast<std::string*>(userp);
+
+    // Sanity check
+    if (!str) {
+        // std::cerr << "[ERROR] Null pointer received in writeCallback" << std::endl;
+        logger::error() << "Null pointer received in writeCallback" << logger::endl;
+        return 0;  // Returning 0 will signal CURL that an error occurred
+    }
+
+    try {
+        str->append(static_cast<char*>(contents), totalSize);
+    } catch (const std::exception& e) {
+        // std::cerr << "[ERROR] Exception in writeCallback: " << e.what() << std::endl;
+        logger::error() << "Exception in writeCallback: " << e.what() << logger::endl;
+        return 0;
+    }
+
+    return totalSize;
 }
 
 UrlFetcher::UrlFetcher() {
@@ -26,7 +51,8 @@ int UrlFetcher::fetch_url(const std::string& url, HttpResponse& response) {
 
         CURLcode res = curl_easy_perform(curl);
         if (res != CURLE_OK) {
-            std::cerr << "[ERROR] Fetching URL failed: " << curl_easy_strerror(res) << "; URL: "<< url << std::endl;
+            // std::cerr << "[ERROR] Fetching URL failed: " << curl_easy_strerror(res) << "; URL: "<< url << std::endl;
+            logger::error() << "Fetching URL failed: " << curl_easy_strerror(res) << "; URL: "<< url << logger::endl;
             return 1;
         }
 
@@ -52,6 +78,13 @@ int UrlFetcher::fetch_url(const std::string& url, HttpResponse& response) {
         size_t path_start = url.find('/', scheme_end + 3);
         response.base_url = url.substr(0, path_start);
         response.domain = url.substr(scheme_end + 3, path_start - scheme_end - 3);
+        if (response.status_code == 302) {
+            char* redirect_url;
+            curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &redirect_url);
+            if (redirect_url) {
+                response.redirect_url = redirect_url;
+            }
+        }
     } else {
         std::cerr << "[ERROR] Failed to initialize CURL" << std::endl;
         return 1;

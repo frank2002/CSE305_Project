@@ -29,6 +29,8 @@ void initializeLogging() {
 
 int main() {
     initializeLogging();
+
+    curl_global_init(CURL_GLOBAL_ALL);
     std::string url1 = "https://www.google.com";
     std::string url2 = "https://www.yahoo.com";
     std::string url3 = "https://www.isnowfy.com/libcurl-fetch-webpage/";
@@ -38,7 +40,7 @@ int main() {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    Crawler crawler(url6, 8, "output.txt");
+    Crawler crawler(url6, 10, "output.txt");
     crawler.start();
 
     

@@ -14,6 +14,7 @@ struct HttpResponse
     std::string charset;
     std::string base_url;
     std::string domain;
+    std::string redirect_url;
 };
 
 

@@ -1,6 +1,6 @@
 #include "UrlStore.h"
 
-UrlStore::UrlStore(): striped_visited_urls(20){
+UrlStore::UrlStore(): striped_visited_urls(64){
     
 }
 
@@ -10,7 +10,7 @@ UrlStore::~UrlStore() {
 
 void UrlStore::set_filename(const std::string& filename) {
     this->filename = filename;
-    file_stream.open(filename, std::ios::out | std::ios::app);
+    file_stream.open(filename, std::ios::out);
 }
 
 void UrlStore::write_url(const std::string& visited_url, const std::string& from_url) {
