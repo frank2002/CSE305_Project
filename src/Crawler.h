@@ -7,6 +7,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
+#include <chrono>
 
 #include "UrlStore.h"
 #include "UrlFetcher.h"
@@ -16,7 +17,7 @@
 
 class Crawler {
 public:
-    Crawler(const std::string& start_url, const size_t num_threads, const std::string& file_path);
+    Crawler(const std::string& start_url, const size_t num_threads, const std::string& file_path, size_t max_urls, std::chrono::seconds max_time);
     ~Crawler();
 
     void start();
@@ -44,6 +45,9 @@ private:
     std::string domain; 
 
     std::string file_path;
+
+    size_t max_urls; //maximum number of URLs to be visited. If exceeded, the crawler will stop
+    std::chrono::seconds max_time; //maximum time to run the crawler. If exceeded, the crawler will stop
 
 
     void worker_thread();

@@ -66,6 +66,18 @@
         "cfenv": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "__nullptr": "cpp"
-    }
+        "__nullptr": "cpp",
+        "list": "cpp"
+    },
+    "cmake.debugConfig": {
+        "args": [
+            "--url=https://en.wikipedia.org/wiki/Main_Page", 
+            "--threads=32",
+            "--output=found_urls.txt",
+            "--max-urls=0",
+            "--max-time=60",
+            "--debug=1",
+            "cache-type=1"
+        ]
+     }
 }

@@ -29,6 +29,8 @@ public:
     bool search_visited_url_striped(const std::string& url);
     bool search_visited_url_simple(const std::string& url);
 
+    size_t get_visited_urls_size() const;
+
 
 private:
     std::string filename;

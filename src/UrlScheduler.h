@@ -4,6 +4,7 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <chrono>
 
 class UrlScheduler {
 public:
@@ -24,6 +25,8 @@ public:
 
     std::condition_variable queueCondition;
     std::mutex queueMutex;
+    //storing starting time of the crawler
+    std::chrono::system_clock::time_point start_time;
 
 
 private:

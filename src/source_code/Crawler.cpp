@@ -1,15 +1,17 @@
 #include "Crawler.h"
-#include <string>
 #include <cpplog/log.h>
 
 #define CPPLOG_NAMESPACE logger
 
-Crawler::Crawler(const std::string& start_url, const size_t num_threads, const std::string& file_path) :
+Crawler::Crawler(const std::string& start_url, const size_t num_threads, const std::string& file_path, size_t max_urls, std::chrono::seconds max_time) :
     num_threads(num_threads),
     active_threads(0),
     start_url(start_url),
-    file_path(file_path){
+    file_path(file_path),
+    max_urls(max_urls),
+    max_time(max_time){
     curl_global_init(CURL_GLOBAL_ALL);
+
 }
 
 Crawler::~Crawler() {
@@ -23,21 +25,54 @@ void Crawler::start() {
     url_store.set_filename(file_path);
     url_scheduler.enqueueUrl(start_url);
 
+    int ending_signal = -1;
+
 
     for (size_t i = 0; i < num_threads; ++i) {
         workers.push_back(std::thread(&Crawler::worker_thread, this));
     }
+    auto start_time = std::chrono::system_clock::now();
+    url_scheduler.start_time = start_time;
 
+    logger::debug() << "max_time: " << max_time.count() << " seconds" << logger::endl;
     while(true){
         std::this_thread::sleep_for(std::chrono::seconds(1));
         std::unique_lock<std::mutex> lock(termination_mutex);
-        termination_condition.wait(lock, [this] {
-            return url_scheduler.isEmpty() && active_threads == 0;
+
+        termination_condition.wait(lock, [this, start_time] {
+            auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start_time);
+            logger::debug() << "Elapsed time: " << elapsed_time.count() << " seconds" << logger::endl;
+            return (
+                (url_scheduler.isEmpty() && active_threads == 0)    // all threads are done
+                || (max_urls > 0 && url_store.get_visited_urls_size() >= max_urls)    // max number of URLs reached
+                || (max_time.count() > 0 && max_time.count() <= elapsed_time.count())     // max time reached
+            );
         });
+
+        auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start_time);
+        logger::debug() << "Elapsed time: " << elapsed_time.count() << " seconds" << logger::endl;
+
+
+        if (max_urls > 0 && url_store.get_visited_urls_size() >= max_urls) {
+            logger::info()  <<"\033[31mReached the maximum limit of visited URLs: " << max_urls << "\033[0m" <<logger::endl;
+            running = false;
+            url_scheduler.notify_all_workers();
+            ending_signal = 2;
+            break;
+        }
+
+        if (max_time.count() > 0 && max_time.count() <= elapsed_time.count()) {
+            logger::info() << "\033[31mReached the maximum time limit: " << max_time.count() << " seconds\033[0m" << logger::endl;
+            running = false;
+            url_scheduler.notify_all_workers();
+            ending_signal = 1;
+            break;
+        }
 
         if (url_scheduler.isEmpty() && active_threads == 0) {
             running = false;
             url_scheduler.notify_all_workers();
+            ending_signal = 0;
             break;
         }
 
@@ -49,6 +84,18 @@ void Crawler::start() {
         }
     }
 
+    if (ending_signal == -1){
+        logger::error() << "\033[31mCrawler ended with unknown error\033[0m" << logger::endl;   
+    } else if (ending_signal == 0){
+        logger::info() << "\033[32mCrawler ended successfully\033[0m" << logger::endl;
+    } else if (ending_signal == 1){
+        logger::info() << "\033[32mCrawler ended due to time limit\033[0m" << logger::endl;
+    } else if (ending_signal == 2){
+        logger::info() << "\033[32mCrawler ended due to URL limit\033[0m" << logger::endl;
+    }
+
+
+    logger::info() << "\033[32mVisited URLs: " << url_store.get_visited_urls_size() << "\033[0m" << logger::endl;
 
     
 }
@@ -74,6 +121,10 @@ void Crawler::worker_thread() {
             }
             if (!url_scheduler.isEmpty_non_blocking()) {
                 current_url = url_scheduler.dequeueUrl_non_blocking();
+                if (url_store.search_visited_url(current_url)) {
+                    // logger::debug() << " skipping visited URL: " << current_url << logger::endl;
+                    continue;
+                }
                 active_threads++;
             } else {
                 continue;
@@ -109,7 +160,7 @@ void Crawler::worker_thread() {
                 std::unordered_set<std::string> links;
                 extractor.extract_links(response.html_content, links, response.base_url);
                 std::vector<std::string> filtered_links;
-                filtered_links = extractor.filter_links(links, response.domain, 1);
+                filtered_links = extractor.filter_links(links, response.domain, 1); // make sure the links are from the same domain
                 std::vector<std::string> new_links = url_store.filter_out_visited_urls(filtered_links);
                 
                 for(const auto& link : new_links){
@@ -124,7 +175,7 @@ void Crawler::worker_thread() {
             url_store.add_visited_url(response.url);
             url_scheduler.enqueueUrl(response.redirect_url);
             url_store.write_url(response.redirect_url, response.url);
-            logger::info() << "Redirecting to: " << response.redirect_url << logger::endl;
+            // logger::info() << "Redirecting to: " << response.redirect_url << logger::endl;
         } else {
             url_store.add_visited_url(response.url);
         }
@@ -132,7 +183,9 @@ void Crawler::worker_thread() {
         {
             std::lock_guard<std::mutex> lock(termination_mutex);
             active_threads--;
-            if (url_scheduler.isEmpty() && active_threads == 0) {
+            if (url_scheduler.isEmpty() && active_threads == 0
+                || (max_urls > 0 && url_store.get_visited_urls_size() >= max_urls)
+                || (max_time.count() > 0 && std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - url_scheduler.start_time).count() >= max_time.count())){
                 termination_condition.notify_one();
             }
         }

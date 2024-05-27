@@ -37,6 +37,9 @@ public:
     // Resize the bucket count
     void resize(size_t num_stripes);
 
+    // Get the size of the whole hashset
+    size_t get_size() const;
+
 private:
     // Number of stripes
     int num_stripes_;
@@ -48,7 +51,7 @@ private:
     // Hash function
     std::hash<T> hash_fn_;
     
-    float max_load_factor = 20;
+    float max_load_factor = 10;
     size_t size=0;
 
 

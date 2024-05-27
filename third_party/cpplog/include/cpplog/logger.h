@@ -111,11 +111,11 @@ namespace cpplog
 
             // Add module
 
-            std::string fileName = __FILE__;
-            fileName = fileName.substr(fileName.find_last_of("/\\") + 1);
-            fileName = fileName.substr(0, fileName.find_last_of("."));
-            std::wstring mod = std::wstring(fileName.begin(), fileName.end());
-            oss << L"[" << mod << L"]";
+            // std::string fileName = __FILE__;
+            // fileName = fileName.substr(fileName.find_last_of("/\\") + 1);
+            // fileName = fileName.substr(0, fileName.find_last_of("."));
+            // std::wstring mod = std::wstring(fileName.begin(), fileName.end());
+            // oss << L"[" << mod << L"]";
 
             // Add thread id
             oss << L"[T:" << std::this_thread::get_id() << L"] ";

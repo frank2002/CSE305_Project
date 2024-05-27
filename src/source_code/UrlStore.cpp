@@ -1,6 +1,6 @@
 #include "UrlStore.h"
 
-UrlStore::UrlStore(): striped_visited_urls(64){
+UrlStore::UrlStore(): striped_visited_urls(512){
     
 }
 
@@ -44,9 +44,7 @@ void UrlStore::add_visited_url_striped(const std::string& url) {
     striped_visited_urls.insert(url);
 }
 
-/// @brief Search if the URL is already been cached
-/// @param url 
-/// @return return true if the URL is already been cached
+
 bool UrlStore::search_visited_url(const std::string& url) {
     if (data_structure == 0) {
         return search_visited_url_simple(url);
@@ -73,4 +71,13 @@ std::vector<std::string> UrlStore::filter_out_visited_urls(std::vector<std::stri
         }
     }
     return filtered_urls;
+}
+
+
+size_t UrlStore::get_visited_urls_size() const {
+    if (data_structure == 0) {
+        return visited_urls.size();
+    } else {
+        return striped_visited_urls.get_size();
+    }
 }

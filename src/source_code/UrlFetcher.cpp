@@ -40,6 +40,7 @@ UrlFetcher::~UrlFetcher() {
 
 // Function to fetch URL and populate HttpResponse structure
 int UrlFetcher::fetch_url(const std::string& url, HttpResponse& response) {
+    
     if (curl) {
         response.url = url;
 
@@ -48,13 +49,27 @@ int UrlFetcher::fetch_url(const std::string& url, HttpResponse& response) {
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response.html_content);
 
+        CURLcode res;
 
-        CURLcode res = curl_easy_perform(curl);
-        if (res != CURLE_OK) {
-            // std::cerr << "[ERROR] Fetching URL failed: " << curl_easy_strerror(res) << "; URL: "<< url << std::endl;
-            logger::error() << "Fetching URL failed: " << curl_easy_strerror(res) << "; URL: "<< url << logger::endl;
+        const int max_retry = 3;
+        int attempts = 0;
+        do{
+            res = curl_easy_perform(curl);
+            if (res == CURLE_OK) {
+                break;
+            }
+        
+            logger::warn() << "Attempt " << attempts << " failed. Retry in 5 Seconds. Error: "<< curl_easy_strerror(res) << "; URL: "<< url << logger::endl;
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+
+            
+        }while (++attempts < max_retry);
+
+        if(res != CURLE_OK){
+            logger::error() << "Failed to fetch URL: " << url << logger::endl;
             return 1;
         }
+        
 
         // Get the response code
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response.status_code);
@@ -78,7 +93,7 @@ int UrlFetcher::fetch_url(const std::string& url, HttpResponse& response) {
         size_t path_start = url.find('/', scheme_end + 3);
         response.base_url = url.substr(0, path_start);
         response.domain = url.substr(scheme_end + 3, path_start - scheme_end - 3);
-        if (response.status_code == 302) {
+        if (response.status_code == 302 || response.status_code == 301) {
             char* redirect_url;
             curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &redirect_url);
             if (redirect_url) {

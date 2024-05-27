@@ -115,3 +115,8 @@ template<typename T>
 float StripedHashset<T>::load_factor() const {
     return static_cast<float>(size) / num_stripes_;
 }
+
+template<typename T>
+size_t StripedHashset<T>::get_size() const {
+    return size;
+}
