@@ -1,0 +1,10 @@
+# Default build directory
+build/
+
+#Netbeans
+nbproject/
+
+#Eclipse
+.cproject
+.project
+.csettings

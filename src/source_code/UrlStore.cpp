@@ -1,6 +1,6 @@
 #include "UrlStore.h"
 
-UrlStore::UrlStore(): striped_visited_urls(512){
+UrlStore::UrlStore(): striped_visited_urls(512, 1), striped_found_urls(4096, 2){
     
 }
 
@@ -80,4 +80,32 @@ size_t UrlStore::get_visited_urls_size() const {
     } else {
         return striped_visited_urls.get_size();
     }
+}
+
+size_t UrlStore::get_found_urls_size() const {
+    if (data_structure == 0) {
+        return found_urls.size();
+    } else {
+        return striped_found_urls.get_size();
+    }
+}
+
+
+void UrlStore::add_found_url(const std::string& url) {
+    if (data_structure == 0) {
+        found_urls.insert(url);
+    } else {
+        striped_found_urls.insert(url);
+    }
+    // striped_found_urls.insert(url);
+}
+
+
+void UrlStore::save_found_url_to_file(const std::string& filename) {
+    if (data_structure == 0) {
+        std::this_thread::sleep_for(std::chrono::seconds(1)); // just for testing purpose. Not implemented.
+    }else {
+        striped_found_urls.save_to_file(filename);
+    }
+    // striped_found_urls.save_to_file(filename);
 }

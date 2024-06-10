@@ -21,6 +21,7 @@
 
 
 #include "scripts/package_test.h"
+#include "scripts/testing_threads.h"
 
 
 void initializeLogging() {
@@ -29,7 +30,7 @@ void initializeLogging() {
 }
 
 
-int main(int argc, char** argv) {
+int _main(int argc, char** argv) {
     initializeLogging();
 
     //print all args
@@ -120,12 +121,16 @@ int main(int argc, char** argv) {
 
 
     curl_global_init(CURL_GLOBAL_ALL);
-    std::string url1 = "https://www.google.com";
-    std::string url2 = "https://www.yahoo.com";
-    std::string url3 = "https://www.isnowfy.com/libcurl-fetch-webpage/";
-    std::string url4 = "https://www.example.com";
-    std::string url5 = "https://assets.cnblogs.com/logo.svg";
-    std::string url6 = "https://en.wikipedia.org/wiki/Main_Page";
+    // std::string url1 = "https://www.google.com";
+    // std::string url2 = "https://www.yahoo.com";
+    // std::string url3 = "https://www.isnowfy.com/libcurl-fetch-webpage/";
+    // std::string url4 = "https://www.example.com";
+    // std::string url5 = "https://assets.cnblogs.com/logo.svg";
+    // std::string url6 = "https://en.wikipedia.org/wiki/Main_Page";
+
+    // Sleep for 5 seconds
+    logger::info() << "\033[32mThe Crawler will start in 5 secs\033[0m" << logger::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -134,12 +139,67 @@ int main(int argc, char** argv) {
 
     
 
-
-    
-
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
 
     logger::info() << "\033[32mTime taken: " << elapsed.count() << " seconds\033[0m" << logger::endl;
 
+}
+
+int test_thread() {
+    initializeLogging();
+
+    //print all args
+    logger::info() << "Starting testing for different threads" << logger::endl;
+
+    
+
+    std::string url = "https://en.wikipedia.org/wiki/Main_Page";
+    std::string output = "found_urls.txt";
+    size_t max_urls = 0;
+    std::chrono::seconds max_time = std::chrono::seconds(300);
+    bool debug = false;
+    int cache_type = 0;
+
+    //open a file for saving the results
+
+    std::ofstream outputFile("test_results.txt", std::ios::out);
+    if (!outputFile.is_open()) {
+        logger::error() << "Failed to open the output file" << logger::endl;
+        return 1;
+    }
+
+    outputFile << "Threads VisitedURLs FoundURLs Time" << std::endl;
+
+
+    curl_global_init(CURL_GLOBAL_ALL);
+
+    // for loop in [1,2,4,8,16,32,64]
+    for (int i = 1; i <= 64; i *= 2) {
+        logger::info() << "Number of threads: " << i << logger::endl;
+        auto start = std::chrono::high_resolution_clock::now();
+
+        Crawler crawler(url, i, output, max_urls, max_time);
+        crawler.start();
+
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed = end - start;
+
+        int num_visited_urls = crawler.num_visited_urls;
+        int num_found_urls = crawler.num_found_urls;
+
+        logger::info() << "Time taken: " << elapsed.count() << " seconds" << logger::endl;
+        outputFile << i << " " << num_visited_urls << " " << num_found_urls << " " << elapsed.count() << std::endl;
+        logger::info() << "Sleep for 2 mins"<< logger::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(120));
+    }
+    return 0;
+
+
+}
+
+
+int main(int argc, char** argv) {
+    // return _main(argc, argv); // The Cralwer
+    return test_thread(); // The test for different threads
 }

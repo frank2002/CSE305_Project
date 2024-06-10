@@ -1,8 +1,14 @@
 #include "LinkExtractor.h"
 
 LinkExtractor::LinkExtractor() {
-    link_regex = std::regex("<a href=\"(.*?)\"");
+    // link_regex = std::regex("<a href=\"(.*?)\"");
 }
+
+
+const std::regex LinkExtractor::link_regex(R"(<a\s+href=\"([^\"]+)\")");
+
+
+
 
 LinkExtractor::~LinkExtractor() {
 }
@@ -31,7 +37,13 @@ void LinkExtractor::extract_links(const std::string& html_content, std::unordere
             continue;
         }
         if (link.find("http") != 0) {
-            link = base_url + link;
+            if (base_url.back() == '/' && link.front() == '/') {
+                link = base_url + link.substr(1); // Avoid double slashes
+            } else if (base_url.back() != '/' && link.front() != '/') {
+                link = base_url + "/" + link;
+            } else {
+                link = base_url + link;
+            }
         }
         links.insert(link);
         search_start = match.suffix().first;

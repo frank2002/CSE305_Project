@@ -16,7 +16,7 @@ public:
     std::vector<std::string> filter_links(std::unordered_set<std::string>& links, const std::string& domain, const int strictness = 0);
 
 private:
-    std::regex link_regex;
+    static const std::regex link_regex;
 };
 
 #endif // LINKEXTRACTOR_H

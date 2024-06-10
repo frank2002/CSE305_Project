@@ -24,6 +24,9 @@ public:
     void force_stop();
     void log(const std::string& message);
 
+    int num_visited_urls = 0;
+    int num_found_urls = 0;
+
 
 private:
     std::vector<std::thread> workers;
@@ -52,6 +55,9 @@ private:
 
     void worker_thread();
     int verbose = 1;
+
+
+    
 
 };
 

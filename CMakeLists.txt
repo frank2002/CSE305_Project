@@ -34,6 +34,10 @@ add_subdirectory(third_party/curl-8.7.1)
 
 target_link_libraries(ParallelCrawler PRIVATE libcurl)
 
+add_subdirectory(third_party/cpplog/lib/cpplog)
+
+target_link_libraries(ParallelCrawler PRIVATE cpplog)
+
 
 # Link pthread for std::thread and other threading functionalities
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -41,12 +45,12 @@ find_package(Threads REQUIRED)
 target_link_libraries(ParallelCrawler PRIVATE Threads::Threads)
 
 # Specify the path to the cpplog library
-set(CPPLOG_LIB_PATH ${CMAKE_SOURCE_DIR}/third_party/cpplog/lib/libcpplog.a)
+# set(CPPLOG_LIB_PATH ${CMAKE_SOURCE_DIR}/third_party/cpplog/lib/libcpplog.a)
 
-# Verify the cpplog library exists
-if(NOT EXISTS ${CPPLOG_LIB_PATH})
-    message(FATAL_ERROR "cpplog library not found at ${CPPLOG_LIB_PATH}")
-endif()
+# # Verify the cpplog library exists
+# if(NOT EXISTS ${CPPLOG_LIB_PATH})
+#     message(FATAL_ERROR "cpplog library not found at ${CPPLOG_LIB_PATH}")
+# endif()
 
 # Link the cpplog static library
 target_link_libraries(ParallelCrawler PRIVATE ${CPPLOG_LIB_PATH})

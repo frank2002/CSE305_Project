@@ -84,6 +84,10 @@ void Crawler::start() {
         }
     }
 
+    logger::info() << "\033[32mSaving URLs to file. Please wait!\033[0m" << logger::endl;
+    url_store.save_found_url_to_file(file_path);
+    logger::info() << "\033[32mURLs saved to file\033[0m" << logger::endl << "============================================="<< logger::endl;
+
     if (ending_signal == -1){
         logger::error() << "\033[31mCrawler ended with unknown error\033[0m" << logger::endl;   
     } else if (ending_signal == 0){
@@ -93,6 +97,9 @@ void Crawler::start() {
     } else if (ending_signal == 2){
         logger::info() << "\033[32mCrawler ended due to URL limit\033[0m" << logger::endl;
     }
+
+    num_visited_urls = url_store.get_visited_urls_size();
+    num_found_urls = url_store.get_found_urls_size();
 
 
     logger::info() << "\033[32mVisited URLs: " << url_store.get_visited_urls_size() << "\033[0m" << logger::endl;
@@ -154,7 +161,8 @@ void Crawler::worker_thread() {
         if(response.status_code == 200){
             // check if the url is HTML content
             if(response.content_type.find("text/html") != std::string::npos){
-                url_store.write_url(response.url);
+                // url_store.write_url(response.url);
+                url_store.add_found_url(response.url);
                 url_store.add_visited_url(response.url);
                 LinkExtractor extractor;
                 std::unordered_set<std::string> links;
@@ -164,8 +172,13 @@ void Crawler::worker_thread() {
                 std::vector<std::string> new_links = url_store.filter_out_visited_urls(filtered_links);
                 
                 for(const auto& link : new_links){
+                    // url_store.write_url(link, response.url);
+                    url_store.add_found_url(link);
+                    if (link.find("https://en.wikipedia.org/#cite") == 0) {
+                        continue;
+                    }
                     url_scheduler.enqueueUrl(link);
-                    url_store.write_url(link, response.url);
+
                 }
 
             } else {
@@ -174,7 +187,8 @@ void Crawler::worker_thread() {
         }else if(response.status_code == 302 || response.status_code == 301){
             url_store.add_visited_url(response.url);
             url_scheduler.enqueueUrl(response.redirect_url);
-            url_store.write_url(response.redirect_url, response.url);
+            // url_store.write_url(response.redirect_url, response.url);
+            url_store.add_found_url(response.redirect_url);
             // logger::info() << "Redirecting to: " << response.redirect_url << logger::endl;
         } else {
             url_store.add_visited_url(response.url);

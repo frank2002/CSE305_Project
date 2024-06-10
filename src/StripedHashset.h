@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <iostream>
 #include <list>
+#include <fstream>
 
 #include <cpplog/log.h>
 
@@ -20,7 +21,7 @@ template<typename T>
 class StripedHashset {
 public:
     // Constructor
-    StripedHashset(int num_stripes);
+    StripedHashset(int num_stripes, int id);
 
     // Destructor
     ~StripedHashset();
@@ -40,6 +41,8 @@ public:
     // Get the size of the whole hashset
     size_t get_size() const;
 
+    void save_to_file(const std::string& filename) const;
+
 private:
     // Number of stripes
     int num_stripes_;
@@ -50,8 +53,10 @@ private:
     std::vector<std::unordered_set<T>> buckets_;
     // Hash function
     std::hash<T> hash_fn_;
+
+    std::mutex resize_mutex_;
     
-    float max_load_factor = 10;
+    float max_load_factor = 100;
     size_t size=0;
 
 
@@ -61,6 +66,8 @@ private:
     std::shared_mutex& get_mutex(const T& element) ;
 
     float load_factor() const;
+
+    int id; //for debugging purposes
 };
 
 template class StripedHashset<std::string>;
