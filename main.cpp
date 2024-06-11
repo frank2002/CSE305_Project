@@ -47,6 +47,7 @@ int _main(int argc, char** argv) {
         {"max-time", required_argument, 0, 's'},
         {"debug", required_argument, 0, 'd'},
         {"cache-type", required_argument    , 0, 'c'},
+        {"lab-machine", required_argument, 0, 'l'},
         {0, 0, 0, 0}
     };
 
@@ -57,6 +58,7 @@ int _main(int argc, char** argv) {
     std::chrono::seconds max_time = std::chrono::seconds(0);
     bool debug = false;
     int cache_type = 1;
+    bool lab_machine = false;
 
     int opt_index = 0;
     int c;
@@ -82,6 +84,9 @@ int _main(int argc, char** argv) {
                 break;
             case 'c':
                 cache_type = std::stoi(optarg);
+                break;
+            case 'l':
+                lab_machine = true;
                 break;
             default:
                 break;
@@ -134,7 +139,7 @@ int _main(int argc, char** argv) {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    Crawler crawler(url, threads, output, max_urls, max_time);
+    Crawler crawler(url, threads, output, max_urls, max_time, lab_machine);
     crawler.start();
 
     
@@ -162,6 +167,7 @@ int test_thread() {
     std::chrono::seconds max_time = std::chrono::seconds(300);
     bool debug = false;
     int cache_type = 0;
+    int lab_machine = 1;
 
     //open a file for saving the results
 
@@ -181,7 +187,7 @@ int test_thread() {
         logger::info() << "Number of threads: " << i << logger::endl;
         auto start = std::chrono::high_resolution_clock::now();
 
-        Crawler crawler(url, i, output, max_urls, max_time);
+        Crawler crawler(url, i, output, max_urls, max_time, lab_machine);
         crawler.start();
 
         auto end = std::chrono::high_resolution_clock::now();
@@ -202,6 +208,6 @@ int test_thread() {
 
 
 int main(int argc, char** argv) {
-    // return _main(argc, argv); // The Cralwer
-    return test_thread(); // The test for different threads
+    return _main(argc, argv); // The Cralwer
+    // return test_thread(); // The test for different threads
 }

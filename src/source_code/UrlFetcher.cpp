@@ -39,15 +39,24 @@ UrlFetcher::~UrlFetcher() {
 }
 
 // Function to fetch URL and populate HttpResponse structure
-int UrlFetcher::fetch_url(const std::string& url, HttpResponse& response) {
+int UrlFetcher::fetch_url(const std::string& url, HttpResponse& response, bool lab_machine) {
     
     if (curl) {
         response.url = url;
 
+        if(lab_machine){
+            const std::string curlCertPath = "./ca-bundle.crt";
+            curl_easy_setopt(curl, CURLOPT_CAINFO, curlCertPath.c_str());
+        }
+
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+       
+
+        
         
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response.html_content);
+        // curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
         CURLcode res;
 

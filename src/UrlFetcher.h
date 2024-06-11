@@ -18,7 +18,7 @@ class UrlFetcher {
 public:
     UrlFetcher();
     ~UrlFetcher();
-    int fetch_url(const std::string& url, HttpResponse& response);
+    int fetch_url(const std::string& url, HttpResponse& response, bool lab_machine);
 
 private:
     CURL* curl;

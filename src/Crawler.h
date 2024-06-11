@@ -17,7 +17,7 @@
 
 class Crawler {
 public:
-    Crawler(const std::string& start_url, const size_t num_threads, const std::string& file_path, size_t max_urls, std::chrono::seconds max_time);
+    Crawler(const std::string& start_url, const size_t num_threads, const std::string& file_path, size_t max_urls, std::chrono::seconds max_time, bool lab_machine);
     ~Crawler();
 
     void start();
@@ -55,6 +55,7 @@ private:
 
     void worker_thread();
     int verbose = 1;
+    bool lab_machine = false;
 
 
     

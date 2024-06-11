@@ -3,13 +3,14 @@
 
 #define CPPLOG_NAMESPACE logger
 
-Crawler::Crawler(const std::string& start_url, const size_t num_threads, const std::string& file_path, size_t max_urls, std::chrono::seconds max_time) :
+Crawler::Crawler(const std::string& start_url, const size_t num_threads, const std::string& file_path, size_t max_urls, std::chrono::seconds max_time, bool lab_machine) :
     num_threads(num_threads),
     active_threads(0),
     start_url(start_url),
     file_path(file_path),
     max_urls(max_urls),
-    max_time(max_time){
+    max_time(max_time),
+    lab_machine(lab_machine){
     curl_global_init(CURL_GLOBAL_ALL);
 
 }
@@ -143,7 +144,7 @@ void Crawler::worker_thread() {
         HttpResponse response;
         UrlFetcher fetcher;
 
-        fetcher.fetch_url(current_url, response);
+        fetcher.fetch_url(current_url, response, lab_machine);
 
         
         // std::cout << "[Success] Thread " << std::this_thread::get_id() << " fetched: (" << response.status_code <<") " <<current_url << std::endl;
