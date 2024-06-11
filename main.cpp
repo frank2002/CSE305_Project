@@ -144,6 +144,8 @@ int _main(int argc, char** argv) {
 
     logger::info() << "\033[32mTime taken: " << elapsed.count() << " seconds\033[0m" << logger::endl;
 
+    return 0;
+
 }
 
 int test_thread() {
@@ -191,7 +193,7 @@ int test_thread() {
         logger::info() << "Time taken: " << elapsed.count() << " seconds" << logger::endl;
         outputFile << i << " " << num_visited_urls << " " << num_found_urls << " " << elapsed.count() << std::endl;
         logger::info() << "Sleep for 2 mins"<< logger::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(120));
+        std::this_thread::sleep_for(std::chrono::seconds(180));
     }
     return 0;
 
@@ -200,6 +202,6 @@ int test_thread() {
 
 
 int main(int argc, char** argv) {
-    return _main(argc, argv); // The Cralwer
-    // return test_thread(); // The test for different threads
+    // return _main(argc, argv); // The Cralwer
+    return test_thread(); // The test for different threads
 }

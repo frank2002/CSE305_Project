@@ -5,7 +5,7 @@ LinkExtractor::LinkExtractor() {
 }
 
 
-const std::regex LinkExtractor::link_regex(R"(<a\s+href=\"([^\"]+)\")");
+const std::regex LinkExtractor::link_regex(R"(<a\s+[^>]*href\s*=\s*\"([^\s\"<>]+)\"[^>]*>)");
 
 
 
@@ -13,19 +13,19 @@ const std::regex LinkExtractor::link_regex(R"(<a\s+href=\"([^\"]+)\")");
 LinkExtractor::~LinkExtractor() {
 }
 
-void LinkExtractor::extract_links(const std::string& html_content, std::vector<std::string>& links, const std::string& base_url) {
-    std::smatch match;
-    std::string::const_iterator search_start(html_content.cbegin());
-    while (std::regex_search(search_start, html_content.cend(), match, link_regex)) {
-        std::string link = match[1].str();
-        if (link.find("http") == std::string::npos) {
-            link = base_url + link;
-        }
-        links.push_back(link);
-        search_start = match.suffix().first;
-    }
-    return;
-}
+// void LinkExtractor::extract_links(const std::string& html_content, std::vector<std::string>& links, const std::string& base_url) {
+//     std::smatch match;
+//     std::string::const_iterator search_start(html_content.cbegin());
+//     while (std::regex_search(search_start, html_content.cend(), match, link_regex)) {
+//         std::string link = match[1].str();
+//         if (link.find("http") == std::string::npos) {
+//             link = base_url + link;
+//         }
+//         links.push_back(link);
+//         search_start = match.suffix().first;
+//     }
+//     return;
+// }
 
 void LinkExtractor::extract_links(const std::string& html_content, std::unordered_set<std::string>& links, const std::string& base_url) {
     std::smatch match;
@@ -35,6 +35,10 @@ void LinkExtractor::extract_links(const std::string& html_content, std::unordere
         if(link.find("javascript:") == 0){
             search_start = match.suffix().first;
             continue;
+        }
+        std::size_t pos = link.find_first_of("?#");
+        if (pos != std::string::npos) {
+            link = link.substr(0, pos);
         }
         if (link.find("http") != 0) {
             if (base_url.back() == '/' && link.front() == '/') {
