@@ -21,6 +21,8 @@ include_directories(scripts)
 include_directories(src)
 include_directories(third_party/cpplog/include)
 
+include_directories(/usr/include)
+
 # Find all source files in src directory
 
 file(GLOB_RECURSE SCRIPTS_FILES scripts/*.cpp)
@@ -43,6 +45,9 @@ target_link_libraries(ParallelCrawler PRIVATE cpplog)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(ParallelCrawler PRIVATE Threads::Threads)
+
+target_link_libraries(ParallelCrawler PRIVATE /usr/lib/x86_64-linux-gnu/libre2.so)
+
 
 # Specify the path to the cpplog library
 # set(CPPLOG_LIB_PATH ${CMAKE_SOURCE_DIR}/third_party/cpplog/lib/libcpplog.a)
