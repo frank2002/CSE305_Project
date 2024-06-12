@@ -66,7 +66,7 @@ int UrlFetcher::fetch_url(const std::string& url, HttpResponse& response, bool l
             res = curl_easy_perform(curl);
             curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response.status_code);
             
-            if (res == CURLE_OK || response.status_code == 200 || response.status_code == 404 || response.status_code == 302 || response.status_code == 301) {
+            if (res == CURLE_OK && (response.status_code == 200 || response.status_code == 301 || response.status_code == 302 || response.status_code == 404)) {
                 break;
             }
         
