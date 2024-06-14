@@ -281,3 +281,11 @@ cython_debug/
 # Built Visual Studio Code Extensions
 *.vsix
 
+**/.DS_Store
+**/.ipynb_checkpoints
+**/.vscode
+# Ignore Python cache directories in any directory
+**/__pycache__/
+
+# Ignore cache directories in any directory
+**/cache/
