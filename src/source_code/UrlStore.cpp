@@ -228,6 +228,17 @@ void UrlStore::save_found_url_to_file(const std::string& filename) {
     // striped_found_urls.save_to_file(filename);
 }
 
+void UrlStore::save_found_url_to_file_simple(const std::string& filename) {
+    std::ofstream outfile(filename, std::ios::out);
+    if (!outfile.is_open()) {
+        throw std::runtime_error("Failed to open file");
+    }
+    for (const auto& url : found_urls) {
+        file_stream << url << std::endl;
+    }
+    file_stream.close();
+}
+
 
 void UrlStore::logging_operation_time() {
     logger::info() << "Insertion time: " << insertion_time.count() / 1E6 << " s" << logger::endl;

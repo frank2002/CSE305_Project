@@ -213,8 +213,8 @@ int test_thread() {
 
 
 int main(int argc, char** argv) {
-    // return _main(argc, argv); // The Cralwer
-    return test_thread(); // The test for different threads
+    return _main(argc, argv); // The Cralwer
+    // return test_thread(); // The test for different threads
 
 
 

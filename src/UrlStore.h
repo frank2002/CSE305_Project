@@ -47,6 +47,7 @@ public:
     size_t get_found_urls_size() const;
 
     void save_found_url_to_file(const std::string& filename);
+    void save_found_url_to_file_simple(const std::string& filename);
 
     
 
