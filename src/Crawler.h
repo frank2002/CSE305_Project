@@ -13,20 +13,20 @@
 #include "UrlFetcher.h"
 #include "LinkExtractor.h"
 #include "HttpResponse.h"
-#include "UrlScheduler.h"
+#include "UrlScheduler.h"   
 
-class Crawler
-{
+class Crawler {
 public:
-    Crawler(const std::string &start_url, const size_t num_threads, const std::string &file_path, size_t max_urls, std::chrono::seconds max_time, bool lab_machine);
+    Crawler(const std::string& start_url, const size_t num_threads, const std::string& file_path, size_t max_urls, std::chrono::seconds max_time, int cache_type ,bool lab_machine);
     ~Crawler();
 
     void start();
     void force_stop();
-    void log(const std::string &message);
+    void log(const std::string& message);
 
     int num_visited_urls = 0;
     int num_found_urls = 0;
+
 
 private:
     std::vector<std::thread> workers;
@@ -40,21 +40,27 @@ private:
     std::atomic<bool> running = true;
     size_t num_threads;
 
-    UrlStore url_store = UrlStore();
+    UrlStore url_store;
     UrlScheduler url_scheduler = UrlScheduler();
 
     std::string start_url;
     std::string base_url;
-    std::string domain;
+    std::string domain; 
 
     std::string file_path;
 
-    size_t max_urls;               // maximum number of URLs to be visited. If exceeded, the crawler will stop
-    std::chrono::seconds max_time; // maximum time to run the crawler. If exceeded, the crawler will stop
+    size_t max_urls; //maximum number of URLs to be visited. If exceeded, the crawler will stop
+    std::chrono::seconds max_time; //maximum time to run the crawler. If exceeded, the crawler will stop
+
 
     void worker_thread();
     int verbose = 1;
     bool lab_machine = false;
+    int cache_type;
+
+
+    
+
 };
 
 #endif // CRAWLER_H

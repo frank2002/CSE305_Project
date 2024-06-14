@@ -6,7 +6,7 @@
 #include <vector>
 #include <curl/curl.h>
 
-void fetch_url(const std::string &url);
+void fetch_url(const std::string& url);
 
 int test();
 

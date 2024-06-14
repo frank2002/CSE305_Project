@@ -7,14 +7,13 @@
 #include <regex>
 #include <unordered_set>
 
-class LinkExtractor
-{
+class LinkExtractor {
 public:
     LinkExtractor();
     ~LinkExtractor();
-    void extract_links(const std::string &html_content, std::vector<std::string> &links, const std::string &base_url);
-    void extract_links(const std::string &html_content, std::unordered_set<std::string> &links, const std::string &base_url);
-    std::vector<std::string> filter_links(std::unordered_set<std::string> &links, const std::string &domain, const int strictness = 0);
+    void extract_links(const std::string& html_content, std::vector<std::string>& links, const std::string& base_url);
+    void extract_links(const std::string& html_content, std::unordered_set<std::string>& links, const std::string& base_url);
+    std::vector<std::string> filter_links(std::unordered_set<std::string>& links, const std::string& domain, const int strictness = 0);
 
 private:
     static const std::regex link_regex;
