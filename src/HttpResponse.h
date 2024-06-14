@@ -17,5 +17,4 @@ struct HttpResponse
     std::string redirect_url;
 };
 
-
 #endif // HTTPRESPONSE_H

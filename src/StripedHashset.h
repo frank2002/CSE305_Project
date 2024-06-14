@@ -2,7 +2,6 @@
 #define STRIPEDHASHSET_H
 #define CPPLOG_NAMESPACE logger
 
-
 #include <vector>
 #include <shared_mutex>
 #include <mutex>
@@ -16,9 +15,9 @@
 
 #include <cpplog/log.h>
 
-
-template<typename T>
-class StripedHashset {
+template <typename T>
+class StripedHashset
+{
 public:
     // Constructor
     StripedHashset(int num_stripes, int id);
@@ -27,13 +26,13 @@ public:
     ~StripedHashset();
 
     // Insert an element into the hashset
-    bool insert(const T& element);
+    bool insert(const T &element);
 
     // Remove an element from the hashset
-    bool remove(const T& element);
+    bool remove(const T &element);
 
     // Check if an element is present in the hashset
-    bool contains(const T& element) ;
+    bool contains(const T &element);
 
     // Resize the bucket count
     void resize(size_t num_stripes);
@@ -41,7 +40,7 @@ public:
     // Get the size of the whole hashset
     size_t get_size() const;
 
-    void save_to_file(const std::string& filename) const;
+    void save_to_file(const std::string &filename) const;
 
 private:
     // Number of stripes
@@ -55,22 +54,19 @@ private:
     std::hash<T> hash_fn_;
 
     std::mutex resize_mutex_;
-    
+
     float max_load_factor = 100;
-    size_t size=0;
+    size_t size = 0;
 
+    std::unordered_set<T> &get_bucket(const T &element);
 
-
-    std::unordered_set<T>& get_bucket(const T& element) ;
-
-    std::shared_mutex& get_mutex(const T& element) ;
+    std::shared_mutex &get_mutex(const T &element);
 
     float load_factor() const;
 
-    int id; //for debugging purposes
+    int id; // for debugging purposes
 };
 
 template class StripedHashset<std::string>;
-
 
 #endif // STRIPEDHASHSET_H
